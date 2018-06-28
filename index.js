@@ -74,7 +74,7 @@ function runDSQuery(ds, query) {
             if (err) {
                 reject(err);
             }
-            const hasMore = nextQuery.moreResults !== Datastore.NO_MORE_RESULTS ? nextQuery.endCursor : false;
+            const hasMore = !!nextQuery && nextQuery.moreResults !== Datastore.NO_MORE_RESULTS ? nextQuery.endCursor : false;
             if (hasMore) {
                 runDSQuery(ds, nextQuery).then(moreEntities => {
                     resolve(entities.concat(moreEntities));

@@ -1,9 +1,9 @@
 all:
 
 create-export:
-	gcloud --project=$$PROJECT beta pubsub topics create gcp-alert-service
+	gcloud --project=$$PROJECT pubsub topics create gcp-alert-service
 	
-	gcloud --project=$$PROJECT beta logging sinks create gcp_alert_service \
+	gcloud --project=$$PROJECT logging sinks create gcp_alert_service \
 		pubsub.googleapis.com/projects/$$PROJECT/topics/gcp-alert-service \
 		--log-filter "logName=projects/$$PROJECT/logs/cloudaudit.googleapis.com%2Factivity"
 
@@ -13,9 +13,9 @@ create-export:
 
 	gsutil mb -p $$PROJECT gs://$$PROJECT-gcp-alert-service
 
-	gcloud --project=$$PROJECT beta service-management enable cloudfunctions.googleapis.com
+	gcloud --project=$$PROJECT services enable cloudfunctions.googleapis.com
 
 deploy-function:
-	gcloud --project=$$PROJECT beta functions deploy gcp-alert-service \
+	gcloud --project=$$PROJECT functions deploy gcp-alert-service \
 		--stage-bucket $$PROJECT-gcp-alert-service --trigger-topic gcp-alert-service \
 		--entry-point=pubsubLogSink --region=us-central1
