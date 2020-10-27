@@ -20,9 +20,9 @@ function evalMessage(message, data) {
     }
 }
 
-exports.pubsubLogSink = function (event, callback) {
+exports.pubsubLogSink = function (event, context) {
     const base64 = require('base-64');
-    let data = JSON.parse(base64.decode(event.data.data));
+    let data = JSON.parse(base64.decode(event.data));
 
     Promise.all([
         getConfig(),
@@ -33,18 +33,19 @@ exports.pubsubLogSink = function (event, callback) {
                 let clonedData = JSON.parse(JSON.stringify(data));
                 if (runTest(test.test, clonedData)) {
                     let message = evalMessage(test.message, clonedData);
-                    return sendSlack(test.slackChannel, message, config.slackAPIToken);
+                    console.log('Sending to slack: ' + message);
+                    return sendSlack(test.slackChannel, message, 'xoxb-140199171318-363521511682-gRnBllDbJZFRAg66rm0Ygtt1');
                 }
                 else {
-                    return Promise.resolve();
+                    return Promise.resolve("no match for message insert id: " + clonedData.insertId + ", test: " + test.test);
                 }
             }));
         })
-        .then(() => {
-            callback(null, {});
+        .then((ret) => {
+            console.log(ret);
         })
         .catch(err => {
-            callback(err);
+            console.log(err);
         });
 };
 
@@ -54,6 +55,7 @@ function getConfig() {
     const query = ds.createQuery(['Config']);
     return runDSQuery(ds, query).then(configsArray => {
         return configsArray.reduce((configs, config) => {
+            console.log(config.name + ": " + config.value);
             configs[config.name] = config.value;
             return configs;
         }, {});
@@ -106,3 +108,4 @@ function sendSlack(channel, message, apiToken) {
         });
     });
 }
+
